@@ -1,4 +1,4 @@
-module main
+module gitlab.com/g6834/team41/tasks
 
 go 1.17
 

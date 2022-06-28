@@ -1,9 +1,9 @@
 package main
 
 import (
-	"main/internal/app"
-	"main/internal/env"
-	"main/internal/http"
+	"gitlab.com/g6834/team41/tasks/internal/app"
+	"gitlab.com/g6834/team41/tasks/internal/env"
+	"gitlab.com/g6834/team41/tasks/internal/http"
 )
 
 func main() {

@@ -2,8 +2,8 @@ package http
 
 import (
 	"github.com/go-chi/chi/v5"
-	"main/internal/http/letter"
-	"main/internal/http/task"
+	"gitlab.com/g6834/team41/tasks/internal/http/letter"
+	"gitlab.com/g6834/team41/tasks/internal/http/task"
 	"net/http"
 	"net/http/pprof"
 )

@@ -2,8 +2,8 @@ package env
 
 import (
 	"fmt"
-	"main/internal/cfg"
-	"main/internal/repositories"
+	"gitlab.com/g6834/team41/tasks/internal/cfg"
+	"gitlab.com/g6834/team41/tasks/internal/repositories"
 	"os"
 )
 
