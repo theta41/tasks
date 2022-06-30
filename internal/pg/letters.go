@@ -28,7 +28,7 @@ func (l Letters) GetLettersByTaskName(taskName string) ([]models.Letter, error) 
 		if err := rows.Scan(&letter.ID, &letter.Email, &letter.Order, &letter.TaskId, &letter.Sent, &letter.Answered, &letter.Accepted, &letter.AcceptUuid, &acceptedAt, &sentAt); err != nil {
 			return nil, err
 		}
-		letter.AcceptAt = time.Unix(int64(acceptedAt), 0)
+		letter.AcceptedAt = time.Unix(int64(acceptedAt), 0)
 		letter.SentAt = time.Unix(int64(sentAt), 0)
 		letters = append(letters, letter)
 	}

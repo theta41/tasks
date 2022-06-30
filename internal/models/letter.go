@@ -14,6 +14,6 @@ type Letter struct {
 	Answered   bool      `json:"answered"`
 	Accepted   bool      `json:"accepted"`
 	AcceptUuid uuid.UUID `json:"accept_uuid"`
-	AcceptAt   time.Time `json:"accept_time"`
+	AcceptedAt time.Time `json:"accept_at"`
 	SentAt     time.Time `json:"sent_at"`
 }
