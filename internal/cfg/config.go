@@ -1,6 +1,13 @@
 package cfg
 
+import (
+	"fmt"
+	"os"
+)
+
 type Config struct {
+	Debug bool `yaml:"debug"`
+
 	HostAddress    string `yaml:"host_address"`
 	MetricsAddress string `yaml:"metrics_address"`
 
@@ -8,7 +15,21 @@ type Config struct {
 	JaegerCollector string `yaml:"jaeger_collector"`
 
 	Profiling bool `yaml:"-"`
+
+	DB struct {
+		Host     string `yaml:"host"`
+		Port     int    `yaml:"port"`
+		User     string `yaml:"-"`
+		Password string `yaml:"-"`
+		Name     string `yaml:"name"`
+		SSL      string `yaml:"ssl"`
+	} `yaml:"db"`
 }
+
+const (
+	DbUser     = "DB_USER"
+	DbPassword = "DB_PASSWORD"
+)
 
 func NewConfig(yamlFile string) (*Config, error) {
 	conf := &Config{}
@@ -16,5 +37,17 @@ func NewConfig(yamlFile string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	var ok bool
+	conf.DB.User, ok = os.LookupEnv(DbUser)
+	if !ok {
+		return nil, fmt.Errorf("$" + DbUser + " isn't set")
+	}
+
+	conf.DB.Password, ok = os.LookupEnv(DbPassword)
+	if !ok {
+		return nil, fmt.Errorf("$" + DbPassword + " isn't set")
+	}
+
 	return conf, nil
 }

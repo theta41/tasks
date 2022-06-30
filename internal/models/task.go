@@ -8,5 +8,5 @@ type Task struct {
 	Description  string    `json:"description"`
 	CreatorEmail string    `json:"creator_email"`
 	CreatedAt    time.Time `json:"created_at"`
-	EndedAt      time.Time `json:"ended_at"`
+	FinishedAt   time.Time `json:"ended_at"`
 }

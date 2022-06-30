@@ -10,11 +10,10 @@ type Letter struct {
 	Email      string    `json:"email"`
 	Order      int       `json:"order"`
 	TaskId     int       `json:"task_id"`
-	StatusId   int       `json:"status_id"`
 	Sent       bool      `json:"sent"`
 	Answered   bool      `json:"answered"`
 	Accepted   bool      `json:"accepted"`
 	AcceptUuid uuid.UUID `json:"accept_uuid"`
-	AcceptTime time.Time `json:"accept_time"`
+	AcceptedAt time.Time `json:"accept_at"`
 	SentAt     time.Time `json:"sent_at"`
 }
