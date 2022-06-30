@@ -15,7 +15,7 @@ func TestTask_AddAndGetTask(t *testing.T) {
 	}
 	defer db.Close()
 
-	tasks := NewTask(db)
+	tasks := NewTasks(db)
 
 	task := models.Task{
 		ID:           1,
