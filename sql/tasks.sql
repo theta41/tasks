@@ -9,3 +9,6 @@ CREATE TABLE tasks
     created_at    INT          NOT NULL,
     finished_at   INT          NOT NULL
 );
+
+CREATE UNIQUE INDEX tasks_name_uindex
+    ON tasks (name);
