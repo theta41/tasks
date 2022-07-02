@@ -2,6 +2,7 @@ package pg
 
 import (
 	"database/sql"
+	"github.com/sirupsen/logrus"
 	"gitlab.com/g6834/team41/tasks/internal/models"
 	"time"
 )
@@ -16,11 +17,16 @@ func NewLetters(db *sql.DB) *Letters {
 
 func (l Letters) GetLettersByTaskName(taskName string) ([]models.Letter, error) {
 	letters := make([]models.Letter, 0)
-	rows, err := l.db.Query("SELECT id, email, 'order', task_id, sent, answered, accepted, accept_uuid, accepted_at, sent_at FROM letters LEFT JOIN tasks t ON t.id = letters.task_id WHERE t.name = $1", taskName)
+	rows, err := l.db.Query("SELECT id, email, \"order\", task_id, sent, answered, accepted, accept_uuid, accepted_at, sent_at FROM letters LEFT JOIN tasks t ON t.id = letters.task_id WHERE t.name = $1", taskName)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() {
+		err = rows.Close()
+		if err != nil {
+			logrus.Error(err)
+		}
+	}()
 
 	for rows.Next() {
 		var letter models.Letter
@@ -34,4 +40,16 @@ func (l Letters) GetLettersByTaskName(taskName string) ([]models.Letter, error) 
 	}
 
 	return letters, nil
+}
+
+func (l Letters) AddLetter(letter models.Letter) error {
+	_, err := l.db.Exec("INSERT INTO letters (email, \"order\", task_id, sent, answered, accepted, accept_uuid, accepted_at, sent_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
+		letter.Email, letter.Order, letter.TaskId, letter.Sent, letter.Answered, letter.Accepted, letter.AcceptUuid, letter.AcceptedAt, letter.SentAt)
+	return err
+}
+
+func (l Letters) UpdateLetter(letter models.Letter) error {
+	_, err := l.db.Exec("UPDATE letters SET email = $1, \"order\" = $2, task_id = $3, sent = $4, answered = $5, accepted = $6, accept_uuid = $7, accepted_at = $8, sent_at = $9 WHERE id = $10",
+		letter.Email, letter.Order, letter.TaskId, letter.Sent, letter.Answered, letter.Accepted, letter.AcceptUuid, letter.AcceptedAt, letter.SentAt, letter.ID)
+	return err
 }
