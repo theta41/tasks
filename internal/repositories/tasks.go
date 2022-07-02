@@ -8,4 +8,5 @@ type Tasks interface {
 	GetTaskByName(name string) (models.Task, error)
 	GetAllTasksByEmail(email string) ([]models.Task, error)
 	UpdateTask(task models.Task) error
+	GetTask(id int) (models.Task, error)
 }

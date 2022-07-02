@@ -2,6 +2,7 @@ package pg
 
 import (
 	"database/sql"
+	"github.com/sirupsen/logrus"
 	"gitlab.com/g6834/team41/tasks/internal/models"
 	"time"
 )
@@ -50,7 +51,12 @@ func (t Tasks) GetAllTasksByEmail(email string) ([]models.Task, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() {
+		err = rows.Close()
+		if err != nil {
+			logrus.Error(err)
+		}
+	}()
 
 	for rows.Next() {
 		var task models.Task
@@ -67,4 +73,14 @@ func (t Tasks) UpdateTask(task models.Task) error {
 	_, err := t.db.Exec("UPDATE tasks SET name = $1, description = $2, creator_email = $3, created_at = $4, finished_at = $5 WHERE id = $6",
 		task.Name, task.Description, task.CreatorEmail, task.CreatedAt, task.FinishedAt, task.ID)
 	return err
+}
+
+func (t Tasks) GetTask(id int) (models.Task, error) {
+	var task models.Task
+	var createdAt, finishedAt int64
+	err := t.db.QueryRow("SELECT id, name, description, creator_email, created_at, finished_at FROM tasks WHERE id = $1", id).
+		Scan(&task.ID, &task.Name, &task.Description, &task.CreatorEmail, &createdAt, &finishedAt)
+	task.CreatedAt = time.Unix(createdAt, 0)
+	task.FinishedAt = time.Unix(finishedAt, 0)
+	return task, err
 }

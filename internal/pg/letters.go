@@ -53,3 +53,13 @@ func (l Letters) UpdateLetter(letter models.Letter) error {
 		letter.Email, letter.Order, letter.TaskId, letter.Sent, letter.Answered, letter.Accepted, letter.AcceptUuid, letter.AcceptedAt, letter.SentAt, letter.ID)
 	return err
 }
+
+func (l Letters) GetLetterByUUID(uuid string) (models.Letter, error) {
+	var letter models.Letter
+	var acceptedAt, sentAt int
+	err := l.db.QueryRow("SELECT id, email, \"order\", task_id, sent, answered, accepted, accept_uuid, accepted_at, sent_at FROM letters WHERE accept_uuid = $1", uuid).
+		Scan(&letter.ID, &letter.Email, &letter.Order, &letter.TaskId, &letter.Sent, &letter.Answered, &letter.Accepted, &letter.AcceptUuid, &acceptedAt, &sentAt)
+	letter.AcceptedAt = time.Unix(int64(acceptedAt), 0)
+	letter.SentAt = time.Unix(int64(sentAt), 0)
+	return letter, err
+}
