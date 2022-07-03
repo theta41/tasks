@@ -2,17 +2,22 @@ package env
 
 import (
 	"fmt"
+	"os"
+
+	"gitlab.com/g6834/team41/tasks/internal/grpc"
+
 	"github.com/sirupsen/logrus"
 	"gitlab.com/g6834/team41/tasks/internal/cfg"
 	"gitlab.com/g6834/team41/tasks/internal/pg"
+	"gitlab.com/g6834/team41/tasks/internal/ports"
 	"gitlab.com/g6834/team41/tasks/internal/repositories"
-	"os"
 )
 
 type Environment struct {
-	C  cfg.Config
-	LR repositories.Letters
-	TR repositories.Tasks
+	C    cfg.Config
+	LR   repositories.Letters
+	TR   repositories.Tasks
+	Auth ports.AuthService
 }
 
 var E *Environment
@@ -45,6 +50,7 @@ func init() {
 
 	E.LR = pg.NewLetters(db)
 	E.TR = pg.NewTasks(db)
+	E.Auth = grpc.NewClient(E.C.AuthAddress)
 }
 
 func NewEnvironment(yamlFile string) (*Environment, error) {

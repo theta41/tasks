@@ -1,11 +1,13 @@
 package http
 
 import (
-	"github.com/go-chi/chi/v5"
-	"gitlab.com/g6834/team41/tasks/internal/http/letter"
-	"gitlab.com/g6834/team41/tasks/internal/http/task"
 	"net/http"
 	"net/http/pprof"
+
+	"github.com/go-chi/chi/v5"
+	"gitlab.com/g6834/team41/tasks/internal/http/letter"
+	"gitlab.com/g6834/team41/tasks/internal/http/middlewares"
+	"gitlab.com/g6834/team41/tasks/internal/http/task"
 )
 
 func NewChi() http.Handler {
@@ -32,6 +34,8 @@ func bindHandlers(r *chi.Mux) {
 }
 
 func bindBusiness(r *chi.Mux) {
+	r.Use(middlewares.CheckAuth)
+
 	r.Post(AcceptPath, letter.Accept)
 	r.Post(DeclinePath, letter.Decline)
 
