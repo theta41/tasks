@@ -1,2 +1,7 @@
 include:
   remote: 'https://gitlab.com/mts-teta-public/devops-tools/-/raw/master/.gitlab-ci-main.yml'
+
+newman tests:
+  variables:
+    TEST_COLLECTION_NAME: task
+    SERVICE_API_ENDPOINT: task:3000
