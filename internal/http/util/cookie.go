@@ -2,6 +2,7 @@ package util
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/sirupsen/logrus"
 
@@ -39,12 +40,14 @@ func GetLoginFromCookie(r *http.Request) string {
 
 func PutTokensToCookie(w http.ResponseWriter, tokens models.TokenPair) {
 	access := http.Cookie{
-		Name:  cookieAccessToken,
-		Value: tokens.AccessToken,
+		Name:    cookieAccessToken,
+		Value:   tokens.AccessToken,
+		Expires: time.Time{}.AddDate(9999, 0, 0), //learning cookies never expires
 	}
 	refresh := http.Cookie{
-		Name:  cookieRefreshToken,
-		Value: tokens.RefreshToken,
+		Name:    cookieRefreshToken,
+		Value:   tokens.RefreshToken,
+		Expires: time.Time{}.AddDate(9999, 0, 0), //learning cookies never expires
 	}
 
 	logrus.Print("put tokens to cookies", access, refresh)
