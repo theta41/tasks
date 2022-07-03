@@ -17,7 +17,7 @@ func NewTasks(db *sql.DB) Tasks {
 
 func (t Tasks) AddTask(task models.Task) (int, error) {
 	row := t.db.QueryRow("INSERT INTO tasks (name, description, creator_email, created_at, finished_at) VALUES ($1, $2, $3, $4, $5) RETURNING id",
-		task.Name, task.Description, task.CreatorEmail, task.CreatedAt, task.FinishedAt)
+		task.Name, task.Description, task.CreatorEmail, task.CreatedAt.Unix(), task.FinishedAt.Unix())
 	if row.Err() != nil {
 		return 0, row.Err()
 	}
@@ -71,7 +71,7 @@ func (t Tasks) GetAllTasksByEmail(email string) ([]models.Task, error) {
 
 func (t Tasks) UpdateTask(task models.Task) error {
 	_, err := t.db.Exec("UPDATE tasks SET name = $1, description = $2, creator_email = $3, created_at = $4, finished_at = $5 WHERE id = $6",
-		task.Name, task.Description, task.CreatorEmail, task.CreatedAt, task.FinishedAt, task.ID)
+		task.Name, task.Description, task.CreatorEmail, task.CreatedAt.Unix(), task.FinishedAt.Unix(), task.ID)
 	return err
 }
 

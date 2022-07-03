@@ -23,7 +23,7 @@ func CreateTask(task models.Task, emails []string) error {
 			Answered:   false,
 			Accepted:   false,
 			AcceptUuid: uuid.New(),
-			AcceptedAt: time.Time{},
+			AcceptedAt: time.Unix(0, 0),
 			SentAt:     time.Now(),
 		}
 		// TODO: batch letters.

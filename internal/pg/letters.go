@@ -44,13 +44,13 @@ func (l Letters) GetLettersByTaskName(taskName string) ([]models.Letter, error) 
 
 func (l Letters) AddLetter(letter models.Letter) error {
 	_, err := l.db.Exec("INSERT INTO letters (email, \"order\", task_id, sent, answered, accepted, accept_uuid, accepted_at, sent_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
-		letter.Email, letter.Order, letter.TaskId, letter.Sent, letter.Answered, letter.Accepted, letter.AcceptUuid, letter.AcceptedAt, letter.SentAt)
+		letter.Email, letter.Order, letter.TaskId, letter.Sent, letter.Answered, letter.Accepted, letter.AcceptUuid, letter.AcceptedAt.Unix(), letter.SentAt.Unix())
 	return err
 }
 
 func (l Letters) UpdateLetter(letter models.Letter) error {
 	_, err := l.db.Exec("UPDATE letters SET email = $1, \"order\" = $2, task_id = $3, sent = $4, answered = $5, accepted = $6, accept_uuid = $7, accepted_at = $8, sent_at = $9 WHERE id = $10",
-		letter.Email, letter.Order, letter.TaskId, letter.Sent, letter.Answered, letter.Accepted, letter.AcceptUuid, letter.AcceptedAt, letter.SentAt, letter.ID)
+		letter.Email, letter.Order, letter.TaskId, letter.Sent, letter.Answered, letter.Accepted, letter.AcceptUuid, letter.AcceptedAt.Unix(), letter.SentAt.Unix(), letter.ID)
 	return err
 }
 
