@@ -4,6 +4,7 @@ type Config struct {
 	Debug bool `yaml:"debug"`
 
 	HostAddress    string `yaml:"host_address"`
+	AuthAddress    string `yaml:"auth_address"`
 	MetricsAddress string `yaml:"metrics_address"`
 
 	SentryDSN       string `yaml:"sentry_dsn"`

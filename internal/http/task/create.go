@@ -1,12 +1,16 @@
 package task
 
 import (
+	"context"
 	"encoding/json"
-	"github.com/sirupsen/logrus"
-	"gitlab.com/g6834/team41/tasks/internal/domain"
-	"gitlab.com/g6834/team41/tasks/internal/models"
 	"net/http"
 	"time"
+
+	"github.com/sirupsen/logrus"
+	"gitlab.com/g6834/team41/tasks/internal/domain"
+	"gitlab.com/g6834/team41/tasks/internal/env"
+	"gitlab.com/g6834/team41/tasks/internal/http/util"
+	"gitlab.com/g6834/team41/tasks/internal/models"
 )
 
 type CreateRequest struct {
@@ -26,13 +30,26 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: Validate access rights
-
 	// TODO: Get login from cookie
 	login := "test@example.org"
 
+	tokens := util.GetTokensFromCookie(r)
+
+	// Validate access rights
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	newTokens, err := env.E.Auth.Validate(ctx, login, tokens)
+	if err != nil {
+		http.Error(w, "{}", http.StatusInternalServerError)
+		logrus.Error(err)
+		return
+	}
+
+	util.PutTokensToCookie(w, newTokens)
+
 	// Create task
-	err := domain.CreateTask(models.Task{
+	err = domain.CreateTask(models.Task{
 		Name:        req.Name,
 		Description: req.Description,
 		// TODO: change
