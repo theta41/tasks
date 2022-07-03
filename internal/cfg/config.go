@@ -1,10 +1,5 @@
 package cfg
 
-import (
-	"fmt"
-	"os"
-)
-
 type Config struct {
 	Debug bool `yaml:"debug"`
 
@@ -19,8 +14,8 @@ type Config struct {
 	DB struct {
 		Host     string `yaml:"host"`
 		Port     int    `yaml:"port"`
-		User     string `yaml:"-"`
-		Password string `yaml:"-"`
+		User     string `yaml:"user"`
+		Password string `yaml:"password"`
 		Name     string `yaml:"name"`
 		SSL      string `yaml:"ssl"`
 	} `yaml:"db"`
@@ -38,16 +33,16 @@ func NewConfig(yamlFile string) (*Config, error) {
 		return nil, err
 	}
 
-	var ok bool
-	conf.DB.User, ok = os.LookupEnv(DbUser)
-	if !ok {
-		return nil, fmt.Errorf("$" + DbUser + " isn't set")
-	}
-
-	conf.DB.Password, ok = os.LookupEnv(DbPassword)
-	if !ok {
-		return nil, fmt.Errorf("$" + DbPassword + " isn't set")
-	}
+	//var ok bool
+	//conf.DB.User, ok = os.LookupEnv(DbUser)
+	//if !ok {
+	//	return nil, fmt.Errorf("$" + DbUser + " isn't set")
+	//}
+	//
+	//conf.DB.Password, ok = os.LookupEnv(DbPassword)
+	//if !ok {
+	//	return nil, fmt.Errorf("$" + DbPassword + " isn't set")
+	//}
 
 	return conf, nil
 }
