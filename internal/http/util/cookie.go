@@ -13,6 +13,10 @@ func GetTokensFromCookie(r *http.Request) models.TokenPair {
 	}
 }
 
+func GetLoginFromCookie(r *http.Request) string {
+	return "test@example.org"
+}
+
 func PutTokensToCookie(w http.ResponseWriter, tokens models.TokenPair) {
 	// TODO Put new tokens to cookie
 }

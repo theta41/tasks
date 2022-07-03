@@ -1,14 +1,12 @@
 package task
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 	"time"
 
 	"github.com/sirupsen/logrus"
 	"gitlab.com/g6834/team41/tasks/internal/domain"
-	"gitlab.com/g6834/team41/tasks/internal/env"
 	"gitlab.com/g6834/team41/tasks/internal/http/util"
 	"gitlab.com/g6834/team41/tasks/internal/models"
 )
@@ -30,29 +28,12 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: Get login from cookie
-	login := "test@example.org"
-
-	tokens := util.GetTokensFromCookie(r)
-
-	// Validate access rights
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
-	newTokens, err := env.E.Auth.Validate(ctx, login, tokens)
-	if err != nil {
-		http.Error(w, "{}", http.StatusInternalServerError)
-		logrus.Error(err)
-		return
-	}
-
-	util.PutTokensToCookie(w, newTokens)
+	login := util.GetLoginFromCookie(r)
 
 	// Create task
-	err = domain.CreateTask(models.Task{
-		Name:        req.Name,
-		Description: req.Description,
-		// TODO: change
+	err := domain.CreateTask(models.Task{
+		Name:         req.Name,
+		Description:  req.Description,
 		CreatorEmail: login,
 		CreatedAt:    time.Now(),
 		FinishedAt:   time.Unix(int64(0), 0),
