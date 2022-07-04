@@ -15,42 +15,51 @@ const (
 	cookieRefreshToken = "RefreshToken"
 )
 
+func mustCookie(r *http.Request, name string) string {
+	v, err := r.Cookie(name)
+	if err != nil || v == nil {
+		logrus.Infof("missing cookie %s", name)
+		return ""
+	}
+
+	// logrus.Debugf ?
+	logrus.Infof("got cookie %v", v)
+	return v.Value
+}
+
 func GetTokensFromCookie(r *http.Request) models.TokenPair {
 
-	access, _ := r.Cookie(cookieAccessToken)
-	refresh, _ := r.Cookie(cookieRefreshToken)
-
-	logrus.Print("got tokens from cookies", access, refresh)
+	access := mustCookie(r, cookieAccessToken)
+	refresh := mustCookie(r, cookieRefreshToken)
 
 	return models.TokenPair{
-		AccessToken:  access.Value,
-		RefreshToken: refresh.Value,
+		AccessToken:  access,
+		RefreshToken: refresh,
 	}
 }
 
 func GetLoginFromCookie(r *http.Request) string {
 	//return "test@example.org"
 
-	login, _ := r.Cookie(cookieLogin)
+	login := mustCookie(r, cookieLogin)
 
-	logrus.Print("got login from cookies", login)
-
-	return login.Value
+	return login
 }
 
 func PutTokensToCookie(w http.ResponseWriter, tokens models.TokenPair) {
 	access := http.Cookie{
 		Name:    cookieAccessToken,
 		Value:   tokens.AccessToken,
-		Expires: time.Time{}.AddDate(9999, 0, 0), //learning cookies never expires
+		Expires: time.Time{}.AddDate(9998, 0, 0), //learning cookies never expires
 	}
 	refresh := http.Cookie{
 		Name:    cookieRefreshToken,
 		Value:   tokens.RefreshToken,
-		Expires: time.Time{}.AddDate(9999, 0, 0), //learning cookies never expires
+		Expires: time.Time{}.AddDate(9998, 0, 0), //learning cookies never expires
 	}
 
-	logrus.Print("put tokens to cookies", access, refresh)
+	//logrus.Debugf("put tokens to cookie %+v %+v", access, refresh)
+	logrus.Infof("put tokens to cookie %v %v", access, refresh)
 
 	http.SetCookie(w, &access)
 	http.SetCookie(w, &refresh)
