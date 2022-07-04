@@ -6,30 +6,38 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	"gitlab.com/g6834/team41/tasks/internal/env"
 	"gitlab.com/g6834/team41/tasks/internal/http/util"
+	"gitlab.com/g6834/team41/tasks/internal/ports"
 )
 
-func CheckAuth(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func GetCheckAuthFunc(auth ports.AuthService) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		// TODO: Get login from cookie
-		login := "test@example.org"
+			//login := "test@example.org" //stub login
+			login := util.GetLoginFromCookie(r)
+			tokens := util.GetTokensFromCookie(r)
 
-		tokens := util.GetTokensFromCookie(r)
+			if login == "" || tokens.AccessToken == "" || tokens.RefreshToken == "" {
+				http.Error(w, "{}", http.StatusForbidden)
+				logrus.Error("empty login or one of tokens")
+				return
+			}
 
-		// Validate access rights
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
+			// Validate access rights
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
 
-		newTokens, err := env.E.Auth.Validate(ctx, login, tokens)
-		if err != nil {
-			http.Error(w, "{}", http.StatusForbidden)
-			logrus.Error(err)
-			return
-		}
+			newTokens, err := auth.Validate(ctx, login, tokens)
+			if err != nil {
+				http.Error(w, "{}", http.StatusForbidden)
+				logrus.Error(err)
+				return
+			}
 
-		util.PutTokensToCookie(w, newTokens)
-		next.ServeHTTP(w, r)
-	})
+			util.PutLoginToCookie(w, login)
+			util.PutTokensToCookie(w, newTokens)
+			next.ServeHTTP(w, r)
+		})
+	}
 }

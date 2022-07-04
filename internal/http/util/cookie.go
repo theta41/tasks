@@ -64,3 +64,15 @@ func PutTokensToCookie(w http.ResponseWriter, tokens models.TokenPair) {
 	http.SetCookie(w, &access)
 	http.SetCookie(w, &refresh)
 }
+
+func PutLoginToCookie(w http.ResponseWriter, loginValue string) {
+	loginCookie := http.Cookie{
+		Name:    cookieLogin,
+		Value:   loginValue,
+		Expires: time.Time{}.AddDate(9998, 0, 0), //learning cookies never expires
+	}
+
+	logrus.Infof("put login to cookie %v", loginCookie)
+
+	http.SetCookie(w, &loginCookie)
+}

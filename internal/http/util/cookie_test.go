@@ -81,3 +81,16 @@ func TestPutTokens(t *testing.T) {
 	require.NotNil(t, cookieRefresh)
 	require.Equal(t, "456", cookieRefresh.Value)
 }
+
+func TestPutLogin(t *testing.T) {
+	recorder := httptest.NewRecorder()
+
+	PutLoginToCookie(recorder, "a@a.org")
+
+	request := &http.Request{Header: http.Header{"Cookie": recorder.Header()["Set-Cookie"]}}
+
+	login, err := request.Cookie(cookieLogin)
+	require.NoError(t, err)
+	require.NotNil(t, login)
+	require.Equal(t, "a@a.org", login.Value)
+}
