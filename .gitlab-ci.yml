@@ -4,4 +4,4 @@ include:
 newman tests:
   variables:
     TEST_COLLECTION_NAME: task
-    SERVICE_API_ENDPOINT: task:3000
+    SERVICE_API_ENDPOINT: tasks:3000
