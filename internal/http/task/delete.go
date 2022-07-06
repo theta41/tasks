@@ -1,10 +1,19 @@
 package task
 
 import (
-	"gitlab.com/g6834/team41/tasks/internal/domain"
 	"net/http"
+
+	"gitlab.com/g6834/team41/tasks/internal/domain"
 )
 
+// @Summary Delete task
+// @Description Delete task
+// @Accept json
+// @Produce json
+// @Success 200
+// @Failure 400
+// @Failure 500
+// @Router /task/{id}/ [delete]
 func Delete(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
