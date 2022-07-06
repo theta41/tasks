@@ -2,11 +2,21 @@ package task
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"gitlab.com/g6834/team41/tasks/internal/domain"
 	"gitlab.com/g6834/team41/tasks/internal/models"
-	"net/http"
 )
 
+// @Summary Update task
+// @Description Update task
+// @Accept json
+// @Produce json
+// @Param task body models.Task true "Task"
+// @Success 200
+// @Failure 400
+// @Failure 500
+// @Router /task/{id}/ [put]
 func Update(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 

@@ -2,14 +2,24 @@ package task
 
 import (
 	"encoding/json"
-	"gitlab.com/g6834/team41/tasks/internal/domain"
 	"net/http"
+
+	"gitlab.com/g6834/team41/tasks/internal/domain"
 )
 
 type ListRequest struct {
-	Email string `json:"email"`
+	Email string `json:"email" example:"test@test.org"`
 }
 
+// @Summary List of tasks
+// @Description List of tasks
+// @Accept json
+// @Produce json
+// @Param task body ListRequest true "List"
+// @Success 200
+// @Failure 400
+// @Failure 500
+// @Router /task/ [get]
 func List(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
