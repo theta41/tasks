@@ -1,0 +1,158 @@
+basePath: /task
+definitions:
+  models.Task:
+    properties:
+      created_at:
+        example: "2021-05-25T00:53:16.535668Z"
+        format: date-time
+        type: string
+      creator_email:
+        example: creator@task.com
+        type: string
+      description:
+        example: Description task
+        type: string
+      ended_at:
+        example: "2021-05-25T00:53:16.535668Z"
+        format: date-time
+        type: string
+      id:
+        example: 123
+        type: integer
+      name:
+        example: Test task
+        type: string
+    type: object
+  task.CreateRequest:
+    properties:
+      description:
+        example: Test description
+        type: string
+      name:
+        example: Test name
+        type: string
+      participant_emails:
+        items:
+          type: string
+        type: array
+    type: object
+  task.ListRequest:
+    properties:
+      email:
+        example: test@test.org
+        type: string
+    type: object
+  task.ReadRequest:
+    properties:
+      name:
+        example: Test task
+        type: string
+    type: object
+host: localhost:3000
+info:
+  contact: {}
+  description: Project Tasks by Team41
+  title: Tasks API
+  version: "1.0"
+paths:
+  /task/:
+    get:
+      consumes:
+      - application/json
+      description: List of tasks
+      parameters:
+      - description: List
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/task.ListRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: ""
+        "500":
+          description: ""
+      summary: List of tasks
+    post:
+      consumes:
+      - application/json
+      description: Create task
+      parameters:
+      - description: New Task
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/task.CreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: ""
+        "500":
+          description: ""
+      summary: Create task
+  /task/{id}/:
+    delete:
+      consumes:
+      - application/json
+      description: Delete task
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: ""
+        "500":
+          description: ""
+      summary: Delete task
+    get:
+      consumes:
+      - application/json
+      description: Read task
+      parameters:
+      - description: Read
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/task.ReadRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: ""
+        "500":
+          description: ""
+      summary: Read task
+    put:
+      consumes:
+      - application/json
+      description: Update task
+      parameters:
+      - description: Task
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/models.Task'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: ""
+        "500":
+          description: ""
+      summary: Update task
+swagger: "2.0"

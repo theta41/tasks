@@ -2,15 +2,25 @@ package task
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"gitlab.com/g6834/team41/tasks/internal/domain"
 	"gitlab.com/g6834/team41/tasks/internal/models"
-	"net/http"
 )
 
 type ReadRequest struct {
-	Name string `json:"name"`
+	Name string `json:"name" example:"Test task"`
 }
 
+// @Summary Read task
+// @Description Read task
+// @Accept json
+// @Produce json
+// @Param task body ReadRequest true "Read"
+// @Success 200
+// @Failure 400
+// @Failure 500
+// @Router /task/{id}/ [get]
 func Read(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 

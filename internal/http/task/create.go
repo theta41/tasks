@@ -12,11 +12,20 @@ import (
 )
 
 type CreateRequest struct {
-	Name              string   `json:"name"`
-	Description       string   `json:"description"`
-	ParticipantEmails []string `json:"participant_emails"`
+	Name              string   `json:"name" example:"Test name"`
+	Description       string   `json:"description" example:"Test description"`
+	ParticipantEmails []string `json:"participant_emails" swaggertype:"array,string" example:"['test@test.org, test@test.com']`
 }
 
+// @Summary Create task
+// @Description Create task
+// @Accept json
+// @Produce json
+// @Param task body CreateRequest true "New Task"
+// @Success 200
+// @Failure 400
+// @Failure 500
+// @Router /task/ [post]
 func Create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
