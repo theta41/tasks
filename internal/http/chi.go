@@ -40,7 +40,7 @@ func bindHandlers(r *chi.Mux) {
 
 func bindBusiness(r *chi.Mux) {
 
-	r.Route("/task", func(r chi.Router) {
+	r.Route("/tasks", func(r chi.Router) {
 		r.Use(middlewares.GetCheckAuthFunc(env.E.Auth))
 		r.Post(AcceptPath, letter.Accept)
 		r.Post(DeclinePath, letter.Decline)
