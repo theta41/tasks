@@ -26,7 +26,7 @@ func TestTask_AddAndGetTask(t *testing.T) {
 		FinishedAt:   time.Unix(0, 0),
 	}
 
-	mock.ExpectQuery("INSERT INTO tasks (.+) RETURNING id").WithArgs(task.Name, task.Description, task.CreatorEmail, task.CreatedAt, task.FinishedAt).WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+	mock.ExpectQuery("INSERT INTO tasks (.+) RETURNING id").WithArgs(task.Name, task.Description, task.CreatorEmail, task.CreatedAt.Unix(), task.FinishedAt.Unix()).WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 	id, err := tasks.AddTask(task)
 	if err != nil {
 		t.Fatalf("Error: %v", err)
