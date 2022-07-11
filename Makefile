@@ -3,7 +3,8 @@
 all: proto swagger test build
 
 test:
-	 go tool cover -func cover.out
+    go test ./... -coverprofile cover.out
+	go tool cover -func cover.out
 
 build:
 	go mod download
