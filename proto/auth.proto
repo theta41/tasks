@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option go_package = "api/auth";
+
+service AuthService {
+    rpc Validate (ValidateRequest) returns (ValidateResponse);
+}
+
+message ValidateRequest {
+    string login = 1;
+    string access_token = 2;
+    string refresh_token = 3;
+}
+
+message ValidateResponse {
+    bool success = 1;
+    string login = 2;
+    string access_token = 4;
+    string refresh_token = 5;
+}
