@@ -1,17 +1,26 @@
 package domain
 
 import (
+	"context"
 	"fmt"
+	"time"
+
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 	"gitlab.com/g6834/team41/tasks/internal/env"
 	"gitlab.com/g6834/team41/tasks/internal/models"
-	"time"
 )
 
 func CreateTask(task models.Task, emails []string) error {
 	id, err := env.E.TR.AddTask(task)
 	if err != nil {
 		return fmt.Errorf("failed to add task: %w", err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+	err = env.E.Analytics.CreateTask(ctx, uint32(task.ID))
+	if err != nil {
+		logrus.Error(err)
 	}
 
 	for i := range emails {
@@ -30,6 +39,10 @@ func CreateTask(task models.Task, emails []string) error {
 		err = env.E.LR.AddLetter(l)
 		if err != nil {
 			return fmt.Errorf("failed to add letter: %w", err)
+		}
+		err = env.E.Analytics.CreateLetter(ctx, uint32(task.ID), l.Email)
+		if err != nil {
+			logrus.Error(err)
 		}
 	}
 

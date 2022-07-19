@@ -1,10 +1,12 @@
 package domain
 
 import (
+	"context"
 	"fmt"
+	"time"
+
 	"github.com/google/uuid"
 	"gitlab.com/g6834/team41/tasks/internal/env"
-	"time"
 )
 
 func Accept(id uuid.UUID) error {
@@ -20,6 +22,9 @@ func Accept(id uuid.UUID) error {
 	if err != nil {
 		return fmt.Errorf("failed to update letter: %w", err)
 	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+	env.E.Analytics.AcceptedLetter(ctx, uint32(letter.TaskId), letter.Email)
 
 	task, err := env.E.TR.GetTask(letter.TaskId)
 	if err != nil {
@@ -40,6 +45,7 @@ func Accept(id uuid.UUID) error {
 		}
 	}
 	if !found {
+		env.E.Analytics.FinishTask(ctx, uint32(task.ID))
 		// TODO: Complete agreement.
 	}
 
@@ -59,6 +65,9 @@ func Decline(id uuid.UUID) error {
 	if err != nil {
 		return fmt.Errorf("failed to update letter: %w", err)
 	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+	env.E.Analytics.DeclinedLetter(ctx, uint32(letter.TaskId), letter.Email)
 
 	task, err := env.E.TR.GetTask(letter.TaskId)
 	if err != nil {
