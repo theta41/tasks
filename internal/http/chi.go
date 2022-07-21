@@ -51,7 +51,6 @@ func bindBusiness(r *chi.Mux) {
 		r.Delete(DeleteTaskPath, task.Delete)
 		r.Get(ListTaskPath, task.List)
 	})
-
 }
 
 func bindProfiler(r *chi.Mux) {

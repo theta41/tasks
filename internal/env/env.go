@@ -14,10 +14,11 @@ import (
 )
 
 type Environment struct {
-	C    cfg.Config
-	LR   repositories.Letters
-	TR   repositories.Tasks
-	Auth ports.AuthService
+	C         cfg.Config
+	LR        repositories.Letters
+	TR        repositories.Tasks
+	Auth      ports.AuthService
+	Analytics ports.AnalyticsService
 }
 
 var E *Environment
@@ -51,6 +52,7 @@ func init() {
 	E.LR = pg.NewLetters(db)
 	E.TR = pg.NewTasks(db)
 	E.Auth = grpc.NewClient(E.C.AuthAddress)
+	E.Analytics = grpc.NewClientEvents(E.C.AnalyticsAddress)
 }
 
 func NewEnvironment(yamlFile string) (*Environment, error) {

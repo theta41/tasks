@@ -3,9 +3,10 @@ package cfg
 type Config struct {
 	Debug bool `yaml:"debug"`
 
-	HostAddress    string `yaml:"host_address"`
-	AuthAddress    string `yaml:"auth_address"`
-	MetricsAddress string `yaml:"metrics_address"`
+	HostAddress      string `yaml:"host_address"`
+	AuthAddress      string `yaml:"auth_address"`
+	GrpcAddress      string `yaml:"grpc_address"`
+	AnalyticsAddress string `yaml:"analytics_address"`
 
 	SentryDSN       string `yaml:"sentry_dsn"`
 	JaegerCollector string `yaml:"jaeger_collector"`
