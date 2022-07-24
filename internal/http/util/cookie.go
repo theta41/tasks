@@ -23,7 +23,7 @@ func mustCookie(r *http.Request, name string) string {
 	}
 
 	// logrus.Debugf ?
-	logrus.Infof("got cookie %v", v)
+	//logrus.Infof("got cookie %v", v)
 	return v.Value
 }
 
@@ -61,7 +61,7 @@ func PutTokensToCookie(w http.ResponseWriter, tokens models.TokenPair) {
 	}
 
 	//logrus.Debugf("put tokens to cookie %+v %+v", access, refresh)
-	logrus.Infof("put tokens to cookie %v %v", access, refresh)
+	//logrus.Infof("put tokens to cookie %v %v", access, refresh)
 
 	http.SetCookie(w, &access)
 	http.SetCookie(w, &refresh)
@@ -75,7 +75,7 @@ func PutLoginToCookie(w http.ResponseWriter, loginValue string) {
 		Expires: time.Time{}.AddDate(9998, 0, 0), //learning cookies never expires
 	}
 
-	logrus.Infof("put login to cookie %v", loginCookie)
+	//logrus.Infof("put login to cookie %v", loginCookie)
 
 	http.SetCookie(w, &loginCookie)
 }

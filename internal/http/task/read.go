@@ -6,6 +6,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"gitlab.com/g6834/team41/tasks/internal/domain"
+	"gitlab.com/g6834/team41/tasks/internal/http/middlewares"
 	"gitlab.com/g6834/team41/tasks/internal/models"
 )
 
@@ -21,23 +22,25 @@ type ReadRequest struct {
 // @Success 200
 // @Failure 400
 // @Failure 500
-// @Router /task/{id}/ [get]
+// @Router /tasks/{id} [get]
 func Read(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	// Get id from /task/{id}
-	rawId := r.Context().Value("id")
+	log := logrus.WithField("RAPI", "Read task by id")
+
+	// Get id from /tasks/{id}
+	rawId := r.Context().Value(middlewares.ContextKeyTaskId)
 	if rawId == nil {
 		http.Error(w, "{}", http.StatusBadRequest)
-		logrus.Error("missing task id in context")
+		log.Error("missing task id in context")
 		return
 	}
 
 	// Try to parse.
-	id, ok := rawId.(string)
+	id, ok := rawId.(int)
 	if !ok {
 		http.Error(w, "{}", http.StatusBadRequest)
-		logrus.Error("can not cast task id to string: ", rawId)
+		log.Error("can not cast task id to int: ", rawId)
 		return
 	}
 
@@ -45,7 +48,7 @@ func Read(w http.ResponseWriter, r *http.Request) {
 	task, letters, err := domain.GetTask(id)
 	if err != nil {
 		http.Error(w, "{}", http.StatusInternalServerError)
-		logrus.Error("domain.GetTask error: ", err)
+		log.Error("domain.GetTask error: ", err)
 		return
 	}
 
@@ -62,13 +65,13 @@ func Read(w http.ResponseWriter, r *http.Request) {
 	res, err := json.Marshal(resp)
 	if err != nil {
 		http.Error(w, "{}", http.StatusInternalServerError)
-		logrus.Error("error marshalling response: ", err)
+		log.Error("error marshalling response: ", err)
 		return
 	}
 	_, err = w.Write(res)
 	if err != nil {
 		http.Error(w, "{}", http.StatusInternalServerError)
-		logrus.Error("error write response: ", err)
+		log.Error("error write response: ", err)
 		return
 	}
 }

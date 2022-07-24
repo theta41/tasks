@@ -31,8 +31,8 @@ func (t Tasks) AddTask(task models.Task) (int, error) {
 	return task.ID, nil
 }
 
-func (t Tasks) DeleteTaskByName(name string) error {
-	_, err := t.db.Exec("DELETE FROM tasks WHERE name = $1", name)
+func (t Tasks) DeleteTaskById(taskId int) error {
+	_, err := t.db.Exec("DELETE FROM tasks WHERE id = $1", taskId)
 	return err
 }
 

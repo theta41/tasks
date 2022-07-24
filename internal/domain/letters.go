@@ -32,7 +32,7 @@ func Accept(id uuid.UUID) error {
 	}
 
 	// Find next letter to send email or complete agreement.
-	letters, err := env.E.LR.GetLettersByTaskName(task.Name)
+	letters, err := env.E.LR.GetLettersByTaskId(task.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get letters: %w", err)
 	}
@@ -75,8 +75,10 @@ func Decline(id uuid.UUID) error {
 	}
 
 	// Send cancel notification to all previous letters and creator.
-	letters, err := env.E.LR.GetLettersByTaskName(task.Name)
+	letters, _ := env.E.LR.GetLettersByTaskId(task.ID)
 	for i := range letters {
+
+		//lint:ignore SA9003 coz of todo
 		if letters[i].Order < letter.Order {
 			// TODO: Send email.
 		}

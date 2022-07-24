@@ -22,14 +22,14 @@ func NewChi() http.Handler {
 }
 
 const (
-	AcceptPath  = "/accept/{id}"
-	DeclinePath = "/decline/{id}"
+	AcceptPath  = "/accept/{uuid}"
+	DeclinePath = "/decline/{uuid}"
 
 	CreateTaskPath = "/"
-	ReadTaskPath   = "/{id}"
-	UpdateTaskPath = "/{id}"
-	DeleteTaskPath = "/{id}"
 	ListTaskPath   = "/"
+	//ReadTaskPath   = "/{id}"
+	//UpdateTaskPath = "/{id}"
+	//DeleteTaskPath = "/{id}"
 )
 
 func bindHandlers(r *chi.Mux) {
@@ -42,14 +42,26 @@ func bindBusiness(r *chi.Mux) {
 
 	r.Route("/tasks", func(r chi.Router) {
 		r.Use(middlewares.GetCheckAuthFunc(env.E.Auth))
-		r.Post(AcceptPath, letter.Accept)
-		r.Post(DeclinePath, letter.Decline)
 
 		r.Post(CreateTaskPath, task.Create)
-		r.Get(ReadTaskPath, task.Read)
-		r.Put(UpdateTaskPath, task.Update)
-		r.Delete(DeleteTaskPath, task.Delete)
 		r.Get(ListTaskPath, task.List)
+
+		r.Route("/{id}", func(r chi.Router) {
+			r.Use(middlewares.TaskIdCtx)
+			r.Get("/", task.Read)
+			r.Put("/", task.Update)
+			r.Delete("/", task.Delete)
+		})
+
+		r.Route(AcceptPath, func(r chi.Router) {
+			r.Use(middlewares.TaskUuidCtx)
+			r.Post("/", letter.Accept)
+		})
+
+		r.Route(DeclinePath, func(r chi.Router) {
+			r.Use(middlewares.TaskUuidCtx)
+			r.Post("/", letter.Accept)
+		})
 	})
 }
 

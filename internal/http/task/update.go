@@ -6,6 +6,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"gitlab.com/g6834/team41/tasks/internal/domain"
+	"gitlab.com/g6834/team41/tasks/internal/http/middlewares"
 	"gitlab.com/g6834/team41/tasks/internal/models"
 )
 
@@ -17,15 +18,25 @@ import (
 // @Success 200
 // @Failure 400
 // @Failure 500
-// @Router /task/{id}/ [put]
+// @Router /tasks/{id} [put]
 func Update(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	// Get id from /task/{id}
-	rawId := r.Context().Value("id")
+	log := logrus.WithField("RAPI", "Update task with id")
+
+	// Get id from /tasks/{id}
+	rawId := r.Context().Value(middlewares.ContextKeyTaskId)
 	if rawId == nil {
 		http.Error(w, "{}", http.StatusBadRequest)
-		logrus.Error("missing task id in context")
+		log.Error("missing task id in context")
+		return
+	}
+
+	// Try to parse.
+	id, ok := rawId.(int)
+	if !ok {
+		http.Error(w, "{}", http.StatusBadRequest)
+		log.Error("can not cast task id to int: ", rawId)
 		return
 	}
 
@@ -34,7 +45,13 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, "{}", http.StatusBadRequest)
-		logrus.Error("error decode request body: ", err)
+		log.Error("error decode request body: ", err)
+		return
+	}
+
+	if req.ID != id {
+		http.Error(w, "{}", http.StatusBadRequest)
+		log.Errorf("wrong task id %v for task %v", id, req)
 		return
 	}
 
@@ -42,7 +59,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	err = domain.UpdateTask(req)
 	if err != nil {
 		http.Error(w, "{}", http.StatusInternalServerError)
-		logrus.Error("domain.UpdateTask error: ", err)
+		log.Error("domain.UpdateTask error: ", err)
 		return
 	}
 
@@ -50,7 +67,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	_, err = w.Write([]byte("{}"))
 	if err != nil {
 		http.Error(w, "{}", http.StatusInternalServerError)
-		logrus.Error("error write response: ", err)
+		log.Error("error write response: ", err)
 		return
 	}
 }

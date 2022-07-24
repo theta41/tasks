@@ -6,5 +6,5 @@ type Letters interface {
 	AddLetter(letter models.Letter) error
 	UpdateLetter(letter models.Letter) error
 	GetLetterByUUID(uuid string) (models.Letter, error)
-	GetLettersByTaskName(taskName string) ([]models.Letter, error)
+	GetLettersByTaskId(taskId int) ([]models.Letter, error)
 }
