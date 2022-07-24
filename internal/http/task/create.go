@@ -33,7 +33,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	var req CreateRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "{}", http.StatusBadRequest)
-		logrus.Error(err)
+		logrus.Error("error decoding body json: ", err)
 		return
 	}
 
@@ -49,7 +49,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}, req.ParticipantEmails)
 	if err != nil {
 		http.Error(w, "{}", http.StatusInternalServerError)
-		logrus.Error(err)
+		logrus.Error("domain.CreateTask error: ", err)
 		return
 	}
 
@@ -58,7 +58,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	_, err = w.Write([]byte("{}"))
 	if err != nil {
 		http.Error(w, "{}", http.StatusInternalServerError)
-		logrus.Error(err)
+		logrus.Error("write response error: ", err)
 		return
 	}
 }

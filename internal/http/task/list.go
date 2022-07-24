@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/sirupsen/logrus"
+
 	"gitlab.com/g6834/team41/tasks/internal/domain"
 )
 
@@ -23,8 +25,6 @@ type ListRequest struct {
 func List(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	// TODO: Validate access rights
-
 	// Parse request body
 	var req ListRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -35,6 +35,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 	// Get all tasks
 	tasks, err := domain.ListTasks(req.Email)
 	if err != nil {
+		logrus.Error("domain.ListTasks error: ", err)
 		http.Error(w, "{}", http.StatusInternalServerError)
 		return
 	}
@@ -43,11 +44,13 @@ func List(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	resp, err := json.Marshal(tasks)
 	if err != nil {
+		logrus.Error("error marshaling response: ", err)
 		http.Error(w, "{}", http.StatusInternalServerError)
 		return
 	}
 	_, err = w.Write(resp)
 	if err != nil {
+		logrus.Error("error writing response: ", err)
 		http.Error(w, "{}", http.StatusInternalServerError)
 		return
 	}

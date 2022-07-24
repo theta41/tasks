@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/sirupsen/logrus"
 	"gitlab.com/g6834/team41/tasks/internal/domain"
 	"gitlab.com/g6834/team41/tasks/internal/models"
 )
@@ -24,6 +25,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	rawId := r.Context().Value("id")
 	if rawId == nil {
 		http.Error(w, "{}", http.StatusBadRequest)
+		logrus.Error("missing task id in context")
 		return
 	}
 
@@ -32,6 +34,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, "{}", http.StatusBadRequest)
+		logrus.Error("error decode request body: ", err)
 		return
 	}
 
@@ -39,6 +42,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	err = domain.UpdateTask(req)
 	if err != nil {
 		http.Error(w, "{}", http.StatusInternalServerError)
+		logrus.Error("domain.UpdateTask error: ", err)
 		return
 	}
 
@@ -46,6 +50,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	_, err = w.Write([]byte("{}"))
 	if err != nil {
 		http.Error(w, "{}", http.StatusInternalServerError)
+		logrus.Error("error write response: ", err)
 		return
 	}
 }
