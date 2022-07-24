@@ -14,7 +14,7 @@ import (
 type CreateRequest struct {
 	Name              string   `json:"name" example:"Test name"`
 	Description       string   `json:"description" example:"Test description"`
-	ParticipantEmails []string `json:"participant_emails" swaggertype:"array,string" example:"['test@test.org, test@test.com']`
+	ParticipantEmails []string `json:"participant_emails" swaggertype:"array,string" example:"['test@test.org, test@test.com']"`
 }
 
 // @Summary Create task
