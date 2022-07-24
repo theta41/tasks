@@ -50,11 +50,13 @@ func PutTokensToCookie(w http.ResponseWriter, tokens models.TokenPair) {
 	access := http.Cookie{
 		Name:    cookieAccessToken,
 		Value:   tokens.AccessToken,
+		Path:    "/",
 		Expires: time.Time{}.AddDate(9998, 0, 0), //learning cookies never expires
 	}
 	refresh := http.Cookie{
 		Name:    cookieRefreshToken,
 		Value:   tokens.RefreshToken,
+		Path:    "/",
 		Expires: time.Time{}.AddDate(9998, 0, 0), //learning cookies never expires
 	}
 
@@ -69,6 +71,7 @@ func PutLoginToCookie(w http.ResponseWriter, loginValue string) {
 	loginCookie := http.Cookie{
 		Name:    cookieLogin,
 		Value:   loginValue,
+		Path:    "/",
 		Expires: time.Time{}.AddDate(9998, 0, 0), //learning cookies never expires
 	}
 
