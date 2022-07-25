@@ -1,9 +1,10 @@
 package letter
 
 import (
+	"net/http"
+
 	"github.com/google/uuid"
 	"gitlab.com/g6834/team41/tasks/internal/domain"
-	"net/http"
 )
 
 func Accept(w http.ResponseWriter, r *http.Request) {

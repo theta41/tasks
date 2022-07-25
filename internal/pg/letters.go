@@ -2,9 +2,10 @@ package pg
 
 import (
 	"database/sql"
+	"time"
+
 	"github.com/sirupsen/logrus"
 	"gitlab.com/g6834/team41/tasks/internal/models"
-	"time"
 )
 
 type Letters struct {
@@ -15,9 +16,9 @@ func NewLetters(db *sql.DB) *Letters {
 	return &Letters{db: db}
 }
 
-func (l Letters) GetLettersByTaskName(taskName string) ([]models.Letter, error) {
+func (l Letters) GetLettersByTaskId(taskId int) ([]models.Letter, error) {
 	letters := make([]models.Letter, 0)
-	rows, err := l.db.Query("SELECT id, email, \"order\", task_id, sent, answered, accepted, accept_uuid, accepted_at, sent_at FROM letters LEFT JOIN tasks t ON t.id = letters.task_id WHERE t.name = $1", taskName)
+	rows, err := l.db.Query("SELECT id, email, \"order\", task_id, sent, answered, accepted, accept_uuid, accepted_at, sent_at FROM letters WHERE task_id = $1", taskId)
 	if err != nil {
 		return nil, err
 	}

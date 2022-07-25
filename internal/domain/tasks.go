@@ -51,8 +51,8 @@ func CreateTask(task models.Task, emails []string) error {
 	return nil
 }
 
-func DeleteTask(name string) error {
-	err := env.E.TR.DeleteTaskByName(name)
+func DeleteTask(taskId int) error {
+	err := env.E.TR.DeleteTaskById(taskId)
 	if err != nil {
 		return fmt.Errorf("failed to delete task: %w", err)
 	}
@@ -67,13 +67,13 @@ func ListTasks(email string) ([]models.Task, error) {
 	return tasks, nil
 }
 
-func GetTask(name string) (*models.Task, []models.Letter, error) {
-	task, err := env.E.TR.GetTaskByName(name)
+func GetTask(id int) (*models.Task, []models.Letter, error) {
+	task, err := env.E.TR.GetTask(id)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get task: %w", err)
 	}
 
-	letters, err := env.E.LR.GetLettersByTaskName(name)
+	letters, err := env.E.LR.GetLettersByTaskId(id)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get letters: %w", err)
 	}

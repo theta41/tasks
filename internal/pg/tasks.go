@@ -2,9 +2,10 @@ package pg
 
 import (
 	"database/sql"
+	"time"
+
 	"github.com/sirupsen/logrus"
 	"gitlab.com/g6834/team41/tasks/internal/models"
-	"time"
 )
 
 type Tasks struct {
@@ -30,8 +31,8 @@ func (t Tasks) AddTask(task models.Task) (int, error) {
 	return task.ID, nil
 }
 
-func (t Tasks) DeleteTaskByName(name string) error {
-	_, err := t.db.Exec("DELETE FROM tasks WHERE name = $1", name)
+func (t Tasks) DeleteTaskById(taskId int) error {
+	_, err := t.db.Exec("DELETE FROM tasks WHERE id = $1", taskId)
 	return err
 }
 
@@ -60,9 +61,12 @@ func (t Tasks) GetAllTasksByEmail(email string) ([]models.Task, error) {
 
 	for rows.Next() {
 		var task models.Task
-		if err := rows.Scan(&task.ID, &task.Name, &task.Description, &task.CreatorEmail, &task.CreatedAt, &task.FinishedAt); err != nil {
+		var createdAt, finishedAt int64
+		if err := rows.Scan(&task.ID, &task.Name, &task.Description, &task.CreatorEmail, &createdAt, &finishedAt); err != nil {
 			return nil, err
 		}
+		task.CreatedAt = time.Unix(createdAt, 0)
+		task.FinishedAt = time.Unix(finishedAt, 0)
 		tasks = append(tasks, task)
 	}
 
