@@ -1,8 +1,9 @@
 package domain
 
 import (
-	"context"
 	"fmt"
+	"github.com/getsentry/sentry-go"
+	"github.com/sirupsen/logrus"
 	"time"
 
 	"github.com/google/uuid"
@@ -22,14 +23,20 @@ func Accept(id uuid.UUID) error {
 	if err != nil {
 		return fmt.Errorf("failed to update letter: %w", err)
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-	env.E.Analytics.AcceptedLetter(ctx, uint32(letter.TaskId), letter.Email)
 
 	task, err := env.E.TR.GetTask(letter.TaskId)
 	if err != nil {
 		return fmt.Errorf("failed to get task: %w", err)
 	}
+
+	// Send accept to kafka
+	go func() {
+		err = env.E.K.Publish([]byte("accept"), []byte(fmt.Sprintf(`{"task_id": %d, "email": "%s"}`, task.ID, letter.Email)))
+		if err != nil {
+			logrus.Error("env.E.K.Publish error: ", err)
+			sentry.CaptureException(err)
+		}
+	}()
 
 	// Find next letter to send email or complete agreement.
 	letters, err := env.E.LR.GetLettersByTaskId(task.ID)
@@ -45,7 +52,13 @@ func Accept(id uuid.UUID) error {
 		}
 	}
 	if !found {
-		env.E.Analytics.FinishTask(ctx, uint32(task.ID))
+		go func() {
+			err = env.E.K.Publish([]byte("finish"), []byte(fmt.Sprintf(`{"task_id": %d}`, task.ID)))
+			if err != nil {
+				logrus.Error("env.E.K.Publish error: ", err)
+				sentry.CaptureException(err)
+			}
+		}()
 		// TODO: Complete agreement.
 	}
 
@@ -65,9 +78,15 @@ func Decline(id uuid.UUID) error {
 	if err != nil {
 		return fmt.Errorf("failed to update letter: %w", err)
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-	env.E.Analytics.DeclinedLetter(ctx, uint32(letter.TaskId), letter.Email)
+
+	// Send decline to kafka
+	go func() {
+		err = env.E.K.Publish([]byte("decline"), []byte(fmt.Sprintf(`{"task_id": %d, "email": "%s"}`, letter.TaskId, letter.Email)))
+		if err != nil {
+			logrus.Error("env.E.K.Publish error: ", err)
+			sentry.CaptureException(err)
+		}
+	}()
 
 	task, err := env.E.TR.GetTask(letter.TaskId)
 	if err != nil {

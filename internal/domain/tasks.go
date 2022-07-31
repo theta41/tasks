@@ -1,8 +1,9 @@
 package domain
 
 import (
-	"context"
 	"fmt"
+	"github.com/getsentry/sentry-go"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -16,12 +17,15 @@ func CreateTask(task models.Task, emails []string) error {
 	if err != nil {
 		return fmt.Errorf("failed to add task: %w", err)
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-	err = env.E.Analytics.CreateTask(ctx, uint32(task.ID))
-	if err != nil {
-		logrus.Error(err)
-	}
+
+	// Send task to kafka
+	go func() {
+		err = env.E.K.Publish([]byte("create-task"), []byte(fmt.Sprintf(`{"task_id": %d}`, id)))
+		if err != nil {
+			logrus.Error("env.E.K.Publish error: ", err)
+			sentry.CaptureException(err)
+		}
+	}()
 
 	for i := range emails {
 		l := models.Letter{
@@ -40,10 +44,15 @@ func CreateTask(task models.Task, emails []string) error {
 		if err != nil {
 			return fmt.Errorf("failed to add letter: %w", err)
 		}
-		err = env.E.Analytics.CreateLetter(ctx, uint32(task.ID), l.Email)
-		if err != nil {
-			logrus.Error(err)
-		}
+
+		// Send task to kafka
+		go func() {
+			err = env.E.K.Publish([]byte("create-letter"), []byte(fmt.Sprintf(`{"email": "%s", "task_id": %d}`, l.Email, l.TaskId)))
+			if err != nil {
+				logrus.Error("env.E.K.Publish error: ", err)
+				sentry.CaptureException(err)
+			}
+		}()
 	}
 
 	// TODO: Send emails
@@ -56,6 +65,16 @@ func DeleteTask(taskId int) error {
 	if err != nil {
 		return fmt.Errorf("failed to delete task: %w", err)
 	}
+
+	// Send delete to kafka
+	go func() {
+		err = env.E.K.Publish([]byte("delete"), []byte(strconv.Itoa(taskId)))
+		if err != nil {
+			logrus.Error("env.E.K.Publish error: ", err)
+			sentry.CaptureException(err)
+		}
+	}()
+
 	return nil
 }
 

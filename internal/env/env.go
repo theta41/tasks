@@ -2,6 +2,8 @@ package env
 
 import (
 	"fmt"
+	"github.com/getsentry/sentry-go"
+	"gitlab.com/g6834/team41/tasks/internal/kafka"
 	"os"
 
 	"gitlab.com/g6834/team41/tasks/internal/grpc"
@@ -14,7 +16,9 @@ import (
 )
 
 type Environment struct {
-	C         cfg.Config
+	C cfg.Config
+
+	K         ports.Queue
 	LR        repositories.Letters
 	TR        repositories.Tasks
 	Auth      ports.AuthService
@@ -49,6 +53,13 @@ func init() {
 		logrus.Panic(fmt.Errorf("failed to connect to postgres: %w", err))
 	}
 
+	initSentry(E.C.SentryDSN)
+
+	E.K, err = kafka.NewClient(E.C.Kafka.Brokers, E.C.Kafka.Topic)
+	if err != nil {
+		logrus.Panic(fmt.Errorf("failed to connect to kafka: %w", err))
+	}
+
 	E.LR = pg.NewLetters(db)
 	E.TR = pg.NewTasks(db)
 	E.Auth = grpc.NewClient(E.C.AuthAddress)
@@ -62,6 +73,16 @@ func NewEnvironment(yamlFile string) (*Environment, error) {
 	}
 
 	return &Environment{C: *conf}, nil
+}
+
+func initSentry(dsn string) {
+	err := sentry.Init(sentry.ClientOptions{
+		Dsn:   dsn,
+		Debug: true,
+	})
+	if err != nil {
+		panic(fmt.Errorf("sentry.Init: %w", err))
+	}
 }
 
 func configureLogger() {

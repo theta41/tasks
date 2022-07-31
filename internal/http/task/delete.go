@@ -1,11 +1,10 @@
 package task
 
 import (
-	"net/http"
-
 	"github.com/sirupsen/logrus"
 	"gitlab.com/g6834/team41/tasks/internal/domain"
 	"gitlab.com/g6834/team41/tasks/internal/http/middlewares"
+	"net/http"
 )
 
 // @Summary Delete task
