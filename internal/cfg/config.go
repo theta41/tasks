@@ -21,6 +21,11 @@ type Config struct {
 		Name     string `yaml:"name"`
 		SSL      string `yaml:"ssl"`
 	} `yaml:"db"`
+
+	Kafka struct {
+		Brokers []string `yaml:"brokers"`
+		Topic   string   `yaml:"topic"`
+	}
 }
 
 const (

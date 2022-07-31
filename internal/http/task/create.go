@@ -2,6 +2,7 @@ package task
 
 import (
 	"encoding/json"
+	"gitlab.com/g6834/team41/tasks/internal/env"
 	"net/http"
 	"time"
 
@@ -50,6 +51,14 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "{}", http.StatusInternalServerError)
 		logrus.Error("domain.CreateTask error: ", err)
+		return
+	}
+
+	// Send task to kafka
+	err = env.E.K.Publish([]byte("create"), []byte(req.Name))
+	if err != nil {
+		http.Error(w, "{}", http.StatusInternalServerError)
+		logrus.Error("env.E.K.Publish error: ", err)
 		return
 	}
 

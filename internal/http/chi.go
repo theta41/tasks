@@ -60,7 +60,7 @@ func bindBusiness(r *chi.Mux) {
 
 		r.Route(DeclinePath, func(r chi.Router) {
 			r.Use(middlewares.TaskUuidCtx)
-			r.Post("/", letter.Accept)
+			r.Post("/", letter.Decline)
 		})
 	})
 }
