@@ -1,13 +1,10 @@
 package task
 
 import (
-	"gitlab.com/g6834/team41/tasks/internal/env"
-	"net/http"
-	"strconv"
-
 	"github.com/sirupsen/logrus"
 	"gitlab.com/g6834/team41/tasks/internal/domain"
 	"gitlab.com/g6834/team41/tasks/internal/http/middlewares"
+	"net/http"
 )
 
 // @Summary Delete task
@@ -43,14 +40,6 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "{}", http.StatusInternalServerError)
 		log.Error("domain.DeleteTask error: ", err)
-		return
-	}
-
-	// Send task to kafka
-	err = env.E.K.Publish([]byte("delete"), []byte(strconv.Itoa(id)))
-	if err != nil {
-		http.Error(w, "{}", http.StatusInternalServerError)
-		logrus.Error("env.E.K.Publish error: ", err)
 		return
 	}
 
