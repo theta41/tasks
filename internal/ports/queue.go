@@ -1,5 +1,6 @@
 package ports
 
 type Queue interface {
-	Publish(key, value []byte) error
+	PublishAnalytics(key, value []byte) error
+	PublishEmail(key, value []byte) error
 }

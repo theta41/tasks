@@ -23,8 +23,9 @@ type Config struct {
 	} `yaml:"db"`
 
 	Kafka struct {
-		Brokers []string `yaml:"brokers"`
-		Topic   string   `yaml:"topic"`
+		Brokers         []string `yaml:"brokers"`
+		TopicAnalytics  string   `yaml:"topic_analytics"`
+		TopicMailsender string   `yaml:"topic_mailsender"`
 	}
 }
 
