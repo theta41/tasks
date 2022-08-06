@@ -40,7 +40,7 @@ func TaskUuidCtx(next http.Handler) http.Handler {
 		uuid := chi.URLParam(r, "uuid")
 		if uuid == "" {
 			http.Error(w, "", http.StatusBadRequest)
-			log.Error("missing task uuid")
+			log.Error("missing letter uuid")
 			return
 		}
 
