@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-
 	"gitlab.com/g6834/team41/tasks/internal/models"
 )
 

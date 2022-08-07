@@ -2,13 +2,15 @@ package domain
 
 import (
 	"fmt"
-	"github.com/getsentry/sentry-go"
 	"strconv"
 	"time"
+
+	"github.com/getsentry/sentry-go"
 
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/g6834/team41/tasks/internal/env"
+	"gitlab.com/g6834/team41/tasks/internal/kafka"
 	"gitlab.com/g6834/team41/tasks/internal/models"
 )
 
@@ -20,9 +22,9 @@ func CreateTask(task models.Task, emails []string) error {
 
 	// Send task to kafka
 	go func() {
-		err = env.E.K.Publish([]byte("create-task"), []byte(fmt.Sprintf(`{"task_id": %d}`, id)))
+		err = env.E.K.PublishAnalytics([]byte("create-task"), []byte(fmt.Sprintf(`{"task_id": %d}`, id)))
 		if err != nil {
-			logrus.Error("env.E.K.Publish error: ", err)
+			logrus.Error("env.E.K.PublishAnalytics error: ", err)
 			sentry.CaptureException(err)
 		}
 	}()
@@ -39,7 +41,7 @@ func CreateTask(task models.Task, emails []string) error {
 			AcceptedAt: time.Unix(0, 0),
 			SentAt:     time.Now(),
 		}
-		// TODO: batch letters.
+
 		err = env.E.LR.AddLetter(l)
 		if err != nil {
 			return fmt.Errorf("failed to add letter: %w", err)
@@ -47,16 +49,37 @@ func CreateTask(task models.Task, emails []string) error {
 
 		// Send task to kafka
 		go func() {
-			err = env.E.K.Publish([]byte("create-letter"), []byte(fmt.Sprintf(`{"email": "%s", "task_id": %d}`, l.Email, l.TaskId)))
+			err := env.E.K.PublishAnalytics([]byte("create-letter"), []byte(fmt.Sprintf(`{"email": "%s", "task_id": %d}`, l.Email, l.TaskId)))
 			if err != nil {
-				logrus.Error("env.E.K.Publish error: ", err)
+				logrus.Error("env.E.K.PublishAnalytics error: ", err)
 				sentry.CaptureException(err)
 			}
 		}()
+
+		if i == 0 {
+			// Send first email
+			baseUrl := fmt.Sprintf("http://tasks%v", env.E.C.HostAddress)
+
+			key := []byte("email")
+			value, err := kafka.MakeAcceptanceEmail(l.Email, baseUrl, id, l.AcceptUuid)
+			if err != nil {
+				logrus.Error("MakeAcceptanceEmail error: ", err)
+				sentry.CaptureException(err)
+			}
+
+			if key != nil && value != nil {
+				// Publish email
+				go func() {
+					err := env.E.K.PublishEmail(key, value)
+					if err != nil {
+						logrus.Error("env.E.K.PublishEmail error: ", err)
+						sentry.CaptureException(err)
+					}
+				}()
+			}
+		}
 	}
 
-	// TODO: Send emails
-	// TODO: Update sent status
 	return nil
 }
 
@@ -68,9 +91,9 @@ func DeleteTask(taskId int) error {
 
 	// Send delete to kafka
 	go func() {
-		err = env.E.K.Publish([]byte("delete"), []byte(strconv.Itoa(taskId)))
+		err := env.E.K.PublishAnalytics([]byte("delete"), []byte(strconv.Itoa(taskId)))
 		if err != nil {
-			logrus.Error("env.E.K.Publish error: ", err)
+			logrus.Error("env.E.K.PublishAnalytics error: ", err)
 			sentry.CaptureException(err)
 		}
 	}()

@@ -2,12 +2,15 @@ package domain
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/sirupsen/logrus"
-	"time"
 
 	"github.com/google/uuid"
 	"gitlab.com/g6834/team41/tasks/internal/env"
+	"gitlab.com/g6834/team41/tasks/internal/kafka"
+	"gitlab.com/g6834/team41/tasks/internal/models"
 )
 
 func Accept(id uuid.UUID) error {
@@ -31,9 +34,9 @@ func Accept(id uuid.UUID) error {
 
 	// Send accept to kafka
 	go func() {
-		err = env.E.K.Publish([]byte("accept"), []byte(fmt.Sprintf(`{"task_id": %d, "email": "%s"}`, task.ID, letter.Email)))
+		err = env.E.K.PublishAnalytics([]byte("accept"), []byte(fmt.Sprintf(`{"task_id": %d, "email": "%s"}`, task.ID, letter.Email)))
 		if err != nil {
-			logrus.Error("env.E.K.Publish error: ", err)
+			logrus.Error("env.E.K.PublishAnalytics error: ", err)
 			sentry.CaptureException(err)
 		}
 	}()
@@ -46,20 +49,22 @@ func Accept(id uuid.UUID) error {
 	found := false
 	for i := range letters {
 		if letters[i].Order == letter.Order+1 {
-			// TODO: Send email to next letter
+
+			// Send email to next letter
+			sendAcceptanceEmail(letters[i])
+
 			found = true
 			break
 		}
 	}
 	if !found {
 		go func() {
-			err = env.E.K.Publish([]byte("finish"), []byte(fmt.Sprintf(`{"task_id": %d}`, task.ID)))
+			err = env.E.K.PublishAnalytics([]byte("finish"), []byte(fmt.Sprintf(`{"task_id": %d}`, task.ID)))
 			if err != nil {
-				logrus.Error("env.E.K.Publish error: ", err)
+				logrus.Error("env.E.K.PublishAnalytics error: ", err)
 				sentry.CaptureException(err)
 			}
 		}()
-		// TODO: Complete agreement.
 	}
 
 	return nil
@@ -81,9 +86,9 @@ func Decline(id uuid.UUID) error {
 
 	// Send decline to kafka
 	go func() {
-		err = env.E.K.Publish([]byte("decline"), []byte(fmt.Sprintf(`{"task_id": %d, "email": "%s"}`, letter.TaskId, letter.Email)))
+		err = env.E.K.PublishAnalytics([]byte("decline"), []byte(fmt.Sprintf(`{"task_id": %d, "email": "%s"}`, letter.TaskId, letter.Email)))
 		if err != nil {
-			logrus.Error("env.E.K.Publish error: ", err)
+			logrus.Error("env.E.K.PublishAnalytics error: ", err)
 			sentry.CaptureException(err)
 		}
 	}()
@@ -97,11 +102,49 @@ func Decline(id uuid.UUID) error {
 	letters, _ := env.E.LR.GetLettersByTaskId(task.ID)
 	for i := range letters {
 
-		//lint:ignore SA9003 coz of todo
 		if letters[i].Order < letter.Order {
-			// TODO: Send email.
+			// Send email
+			sendСancellationEmail(letters[i])
 		}
 	}
 
 	return nil
+}
+
+func sendAcceptanceEmail(l models.Letter) {
+	baseUrl := fmt.Sprintf("http://tasks%v", env.E.C.HostAddress)
+
+	key := []byte("email")
+	value, err := kafka.MakeAcceptanceEmail(l.Email, baseUrl, l.TaskId, l.AcceptUuid)
+	if err != nil {
+		logrus.Error("MakeAcceptanceEmail error: ", err)
+		sentry.CaptureException(err)
+		return
+	}
+
+	go func() {
+		err := env.E.K.PublishEmail(key, value)
+		if err != nil {
+			logrus.Error("env.E.K.PublishEmail error: ", err)
+			sentry.CaptureException(err)
+		}
+	}()
+}
+
+func sendСancellationEmail(l models.Letter) {
+	key := []byte("email")
+	value, err := kafka.MakeCancellationEmail(l.Email, l.TaskId)
+	if err != nil {
+		logrus.Error("MakeCancellationEmail error: ", err)
+		sentry.CaptureException(err)
+		return
+	}
+
+	go func() {
+		err := env.E.K.PublishEmail(key, value)
+		if err != nil {
+			logrus.Error("env.E.K.PublishEmail error: ", err)
+			sentry.CaptureException(err)
+		}
+	}()
 }

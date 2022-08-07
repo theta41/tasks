@@ -2,9 +2,10 @@ package env
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/getsentry/sentry-go"
 	"gitlab.com/g6834/team41/tasks/internal/kafka"
-	"os"
 
 	"gitlab.com/g6834/team41/tasks/internal/grpc"
 
@@ -55,7 +56,7 @@ func init() {
 
 	initSentry(E.C.SentryDSN)
 
-	E.K, err = kafka.NewClient(E.C.Kafka.Brokers, E.C.Kafka.Topic)
+	E.K, err = kafka.NewClient(E.C.Kafka.Brokers, E.C.Kafka.TopicAnalytics, E.C.Kafka.TopicMailsender)
 	if err != nil {
 		logrus.Panic(fmt.Errorf("failed to connect to kafka: %w", err))
 	}
